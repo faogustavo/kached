@@ -1,0 +1,20 @@
+name: Test
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Gradle Wraper Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper/
+          key: ${{ runner.OS }}-gradle-wraper-cache
+
+      - name: Gradle test for JVM
+        run: ./gradlew jvmTest

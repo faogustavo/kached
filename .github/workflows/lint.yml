@@ -1,0 +1,16 @@
+name: Lint
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: ktlint
+        uses: ScaCap/action-ktlint@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          fail_on_error: true

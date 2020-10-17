@@ -1,0 +1,69 @@
+name: Lint
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Gradle Wraper Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper/
+          key: ${{ runner.OS }}-gradle-wraper-cache
+
+      - name: Gradle test for JVM
+        run: ./gradlew jvmTest
+  unixDeploy:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get Version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/v}
+
+      - name: Gradle Wraper Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper/
+          key: ${{ runner.OS }}-gradle-wraper-cache
+
+      - name: Build
+        run: ./gradlew assemble
+
+      - name: Deploy
+        env:
+          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+          BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
+          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+        run: ./gradlew publish
+  mingwDeploy:
+    needs: unixDeploy
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get Version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/v}
+
+      - name: Gradle Wraper Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper/
+          key: ${{ runner.OS }}-gradle-wraper-cache
+
+      - name: Build
+        run: ./gradlew assemble
+
+      - name: Deploy
+        env:
+          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+          BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
+          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+        run: ./gradlew publishMingwX64PublicationToMavenRepository
