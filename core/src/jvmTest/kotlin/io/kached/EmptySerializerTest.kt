@@ -3,6 +3,7 @@ package io.kached
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
+import kotlin.reflect.typeOf
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -31,7 +32,7 @@ class EmptySerializerTest {
     @Test
     fun deserialize_shouldThrown() = runBlockingTest {
         try {
-            EmptySerializer.deserialize<Person>("Name=Gustavo;id=1")
+            EmptySerializer.deserialize<Person>("Name=Gustavo;id=1", Person::class, typeOf<Person>())
             fail("Deserialize must thrown an exception")
         } catch (e: Throwable) {
             assertTrue(e is RuntimeException)

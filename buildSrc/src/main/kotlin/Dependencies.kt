@@ -1,4 +1,8 @@
 
+object Kached {
+    val core = ":core"
+}
+
 object Kotlin {
     val version = "1.4.10"
 
@@ -18,8 +22,10 @@ object Kotlin {
 object Test {
 
     object MockK {
-        val version = "1.10.2"
-
-        val core = "io.mockk:mockk:$version"
+        val core = "io.mockk:mockk:1.10.2"
     }
+}
+
+object Serializers {
+    val gson = "com.google.code.gson:gson:2.8.6"
 }

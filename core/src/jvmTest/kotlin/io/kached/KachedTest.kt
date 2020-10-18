@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
+import kotlin.reflect.typeOf
 
 @ExperimentalCoroutinesApi
 class KachedTest {
@@ -74,7 +75,7 @@ class KachedTest {
 
         coVerify(exactly = 1) { storage.get(Person.KEY) }
         coVerify(exactly = 1) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
-        coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE) }
+        coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE, Person::class, typeOf<Person>()) }
     }
 
     @Test
@@ -89,7 +90,7 @@ class KachedTest {
         coVerify(exactly = 1) { storage.get(Person.KEY) }
         coVerify(exactly = 1) { logger.log("There is no value for key = ${Person.KEY}") }
         coVerify(exactly = 0) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
-        coVerify(exactly = 0) { serializer.deserialize(Person.SERIAL_VALUE) }
+        coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
     }
 
     @Test
@@ -161,7 +162,7 @@ class KachedTest {
         coVerify(exactly = 1) { storage.get(Person.KEY) }
         coVerify(exactly = 1) { logger.log("Failed to acquire data from storage with key = ${Person.KEY}") }
         coVerify(exactly = 0) { encryptor.decrypt(any()) }
-        coVerify(exactly = 0) { serializer.deserialize(any()) }
+        coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
     }
 
     @Test
@@ -175,7 +176,7 @@ class KachedTest {
 
         coVerify(exactly = 1) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 1) { logger.log("Failed to decrypt data with key = ${Person.KEY}") }
-        coVerify(exactly = 0) { serializer.deserialize(any()) }
+        coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
     }
 
     @Test
@@ -187,7 +188,7 @@ class KachedTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE) }
+        coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE, Person::class, typeOf<Person>()) }
         coVerify(exactly = 1) { logger.log("Failed to deserialize data with key = ${Person.KEY}") }
     }
 
@@ -239,12 +240,12 @@ class KachedTest {
         serializer = if (throwError) {
             mockk {
                 coEvery { serialize(any()) } throws FakeException
-                coEvery { deserialize<Person>(any()) } throws FakeException
+                coEvery { deserialize<Person>(any(), any(), any()) } throws FakeException
             }
         } else {
             mockk {
                 coEvery { serialize(any()) } returns Person.SERIAL_VALUE
-                coEvery { deserialize<Person>(any()) } returns Person.INSTANCE
+                coEvery { deserialize<Person>(any(), any(), any()) } returns Person.INSTANCE
             }
         }
     }

@@ -28,6 +28,17 @@ kotlin {
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
+    targets.all {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + arrayOf(
+                    "-Xopt-in=kotlin.RequiresOptIn",
+                    "-Xopt-in=kotlin.ExperimentalStdlibApi"
+                )
+            }
+        }
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {

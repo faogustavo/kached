@@ -1,14 +1,22 @@
 package io.kached
 
-fun <V : Any> kached(block: Kached.Builder.() -> Unit): Kached<V> = Kached.Builder()
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
+
+@ExperimentalStdlibApi
+inline fun <reified V : Any> kached(block: Kached.Builder.() -> Unit): Kached<V> = Kached.Builder()
     .apply(block)
     .build()
 
-class Kached<V : Any> private constructor(
+@ExperimentalStdlibApi
+class Kached<V : Any> @PublishedApi internal constructor(
     private val serializer: Serializer,
     private val storage: Storage,
     private val encryptor: Encryptor,
     private val logger: Logger,
+    private val dataClass: KClass<V>,
+    private val dataType: KType,
 ) {
 
     class Builder {
@@ -17,11 +25,13 @@ class Kached<V : Any> private constructor(
         var encryptor: Encryptor = EmptyEncryptor
         var logger: Logger = EmptyLogger
 
-        fun <V : Any> build(): Kached<V> = Kached<V>(
+        inline fun <reified V : Any> build(): Kached<V> = Kached<V>(
             serializer = this.serializer,
             storage = this.storage,
             encryptor = this.encryptor,
-            logger = this.logger
+            logger = this.logger,
+            dataClass = V::class,
+            dataType = typeOf<V>()
         )
 
         fun copy(
@@ -89,7 +99,7 @@ class Kached<V : Any> private constructor(
         }
 
         return try {
-            serializer.deserialize<V>(decryptedValue)
+            serializer.deserialize<V>(decryptedValue, dataClass, dataType)
         } catch (error: Throwable) {
             log("Failed to deserialize data with key = $key")
             log(error)

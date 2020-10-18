@@ -1,8 +1,11 @@
 package io.kached
 
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+
 interface Serializer {
     suspend fun <T : Any> serialize(data: T): String
-    suspend fun <T : Any> deserialize(serialData: String): T
+    suspend fun <T : Any> deserialize(serialData: String, kclass: KClass<T>, ktype: KType): T
 }
 
 internal object EmptySerializer : Serializer {
@@ -12,7 +15,11 @@ internal object EmptySerializer : Serializer {
         throw RuntimeException(ERROR_MESSAGE)
     }
 
-    override suspend fun <T : Any> deserialize(serialData: String): T {
+    override suspend fun <T : Any> deserialize(
+        serialData: String,
+        kclass: KClass<T>,
+        ktype: KType
+    ): T {
         throw RuntimeException(ERROR_MESSAGE)
     }
 }
