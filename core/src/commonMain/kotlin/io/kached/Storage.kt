@@ -1,14 +1,14 @@
 package io.kached
 
 interface Storage {
-    fun put(key: String, data: String)
-    fun get(key: String): String?
+    operator fun set(key: String, data: String)
+    operator fun get(key: String): String?
 }
 
 internal object EmptyStorage : Storage {
     private const val ERROR_MESSAGE = "No storage was provided"
 
-    override fun put(key: String, data: String) {
+    override fun set(key: String, data: String) {
         throw IllegalStateException(ERROR_MESSAGE)
     }
 

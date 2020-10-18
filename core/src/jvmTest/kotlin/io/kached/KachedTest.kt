@@ -49,7 +49,7 @@ class KachedTest {
 
         coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
         coVerify(exactly = 1) { encryptor.encrypt(Person.SERIAL_VALUE) }
-        coVerify(exactly = 1) { storage.put(Person.KEY, Person.ENCRYPTED_VALUE) }
+        coVerify(exactly = 1) { storage[Person.KEY] = Person.ENCRYPTED_VALUE }
     }
 
     @Test
@@ -73,7 +73,7 @@ class KachedTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { storage.get(Person.KEY) }
+        coVerify(exactly = 1) { storage[Person.KEY] }
         coVerify(exactly = 1) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE, Person::class, typeOf<Person>()) }
     }
@@ -87,7 +87,7 @@ class KachedTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { storage.get(Person.KEY) }
+        coVerify(exactly = 1) { storage[Person.KEY] }
         coVerify(exactly = 1) { logger.log("There is no value for key = ${Person.KEY}") }
         coVerify(exactly = 0) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
@@ -115,7 +115,7 @@ class KachedTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
-        coVerify(exactly = 0) { storage.put(any(), any()) }
+        coVerify(exactly = 0) { storage[any()] = any() }
         coVerify(exactly = 0) { encryptor.encrypt(Person.SERIAL_VALUE) }
         coVerify(exactly = 1) { logger.log("Failed to serialize value with key = ${Person.KEY}") }
         coVerify(exactly = 1) { logger.log(FakeException) }
@@ -131,7 +131,7 @@ class KachedTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { encryptor.encrypt(Person.SERIAL_VALUE) }
-        coVerify(exactly = 0) { storage.put(any(), any()) }
+        coVerify(exactly = 0) { storage[any()] = any() }
         coVerify(exactly = 1) { logger.log("Failed to encrypt data with key = ${Person.KEY}") }
         coVerify(exactly = 1) { logger.log(FakeException) }
     }
@@ -145,7 +145,7 @@ class KachedTest {
 
         subject.set(Person.KEY, Person.INSTANCE)
 
-        coVerify(exactly = 1) { storage.put(Person.KEY, Person.ENCRYPTED_VALUE) }
+        coVerify(exactly = 1) { storage[Person.KEY] = Person.ENCRYPTED_VALUE }
         coVerify(exactly = 1) { logger.log("Failed to store data with key = ${Person.KEY}") }
         coVerify(exactly = 1) { logger.log(FakeException) }
     }
@@ -159,7 +159,7 @@ class KachedTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { storage.get(Person.KEY) }
+        coVerify(exactly = 1) { storage[Person.KEY] }
         coVerify(exactly = 1) { logger.log("Failed to acquire data from storage with key = ${Person.KEY}") }
         coVerify(exactly = 0) { encryptor.decrypt(any()) }
         coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
@@ -273,19 +273,19 @@ class KachedTest {
         storage = when {
             throwError -> {
                 mockk {
-                    coEvery { put(any(), any()) } throws FakeException
+                    coEvery { set(any(), any()) } throws FakeException
                     coEvery { this@mockk.get(any()) } throws FakeException
                 }
             }
             hasValue -> {
                 mockk {
-                    coEvery { put(any(), any()) } just Runs
+                    coEvery { set(any(), any()) } just Runs
                     coEvery { this@mockk.get(any()) } returns Person.ENCRYPTED_VALUE
                 }
             }
             else -> {
                 mockk {
-                    coEvery { put(any(), any()) } just Runs
+                    coEvery { set(any(), any()) } just Runs
                     coEvery { this@mockk.get(any()) } returns null
                 }
             }

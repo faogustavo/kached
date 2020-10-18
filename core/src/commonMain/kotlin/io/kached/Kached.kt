@@ -67,7 +67,7 @@ class Kached<V : Any> @PublishedApi internal constructor(
         }
 
         try {
-            storage.put(key, encryptedValue)
+            storage[key] = encryptedValue
         } catch (error: Throwable) {
             log("Failed to store data with key = $key")
             log(error)
@@ -78,7 +78,7 @@ class Kached<V : Any> @PublishedApi internal constructor(
         log("Kached -> get($key)")
 
         val valueFromStorage = try {
-            storage.get(key)
+            storage[key]
         } catch (error: Throwable) {
             log("Failed to acquire data from storage with key = $key")
             log(error)
