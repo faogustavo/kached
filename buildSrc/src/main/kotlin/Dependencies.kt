@@ -37,3 +37,7 @@ object Test {
 object Serializers {
     const val gson = "com.google.code.gson:gson:2.8.6"
 }
+
+object Android {
+    const val coreKtx = "androidx.core:core-ktx:1.3.2"
+}

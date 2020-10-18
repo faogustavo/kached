@@ -16,5 +16,5 @@ jobs:
           path: ~/.gradle/wrapper/
           key: ${{ runner.OS }}-gradle-wraper-cache
 
-      - name: Gradle test for JVM
-        run: ./gradlew jvmTest
+      - name: Project Tests
+        run: ./gradlew jvmTest testDebugUnitTest
