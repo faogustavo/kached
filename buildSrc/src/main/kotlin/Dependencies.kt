@@ -1,31 +1,39 @@
 
 object Kached {
     val core = ":core"
+
+    object Serializer {
+        const val gson = ":serializer:gson-serializer"
+    }
+
+    object Storage {
+        const val simpleMemory = ":storage:simple-memory-storage"
+    }
 }
 
 object Kotlin {
-    val version = "1.4.10"
+    const val version = "1.4.10"
 
-    val testJUnit = "test-junit"
-    val testJS = "test-js"
-    val testCommon = "test-common"
-    val testAnnotationCommon = "test-annotations-common"
+    const val testJUnit = "test-junit"
+    const val testJS = "test-js"
+    const val testCommon = "test-common"
+    const val testAnnotationCommon = "test-annotations-common"
 
     object Coroutines {
-        val version = "1.4.0-M1"
+        const val version = "1.4.0-M1"
 
-        val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
-        val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
+        const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
+        const val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
     }
 }
 
 object Test {
 
     object MockK {
-        val core = "io.mockk:mockk:1.10.2"
+        const val core = "io.mockk:mockk:1.10.2"
     }
 }
 
 object Serializers {
-    val gson = "com.google.code.gson:gson:2.8.6"
+    const val gson = "com.google.code.gson:gson:2.8.6"
 }

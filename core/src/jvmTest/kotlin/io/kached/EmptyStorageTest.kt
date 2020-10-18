@@ -31,7 +31,7 @@ class EmptyStorageTest {
     @Test
     fun deserialize_shouldThrown() = runBlockingTest {
         try {
-            EmptyStorage["1"]
+            EmptyStorage.get("1")
             fail("Get must thrown an exception")
         } catch (e: Throwable) {
             assertTrue(e is RuntimeException)
