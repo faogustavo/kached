@@ -1,6 +1,7 @@
 package io.kached
 
 import io.kached.impl.KachedImpl
+import io.kached.impl.SynchronizedKachedImpl
 import kotlin.reflect.typeOf
 
 interface Kached<V : Any> {
@@ -28,13 +29,33 @@ class KachedBuilder {
 }
 
 @ExperimentalStdlibApi
-inline fun <reified V : Any> kached(block: KachedBuilder.() -> Unit): Kached<V> = KachedBuilder()
-    .apply(block)
-    .buildKachedImpl()
+inline fun <reified V : Any> kached(
+    synchronized: Boolean = false,
+    block: KachedBuilder.() -> Unit,
+): Kached<V> {
+    val builtKache = KachedBuilder()
+        .apply(block)
+
+    return when {
+        synchronized -> builtKache.buildSynchronizedKachedImpl()
+        else -> builtKache.buildKachedImpl()
+    }
+}
 
 @PublishedApi
 @ExperimentalStdlibApi
-internal inline fun <reified V : Any> KachedBuilder.buildKachedImpl(): Kached<V> = KachedImpl<V>(
+internal inline fun <reified V : Any> KachedBuilder.buildKachedImpl(): Kached<V> = KachedImpl(
+    serializer = this.serializer,
+    storage = this.storage,
+    encryptor = this.encryptor,
+    logger = this.logger,
+    dataClass = V::class,
+    dataType = typeOf<V>()
+)
+
+@PublishedApi
+@ExperimentalStdlibApi
+internal inline fun <reified V : Any> KachedBuilder.buildSynchronizedKachedImpl(): Kached<V> = SynchronizedKachedImpl(
     serializer = this.serializer,
     storage = this.storage,
     encryptor = this.encryptor,

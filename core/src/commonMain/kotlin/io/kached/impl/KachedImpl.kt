@@ -77,13 +77,13 @@ open class KachedImpl<V : Any> @PublishedApi internal constructor(
         }
     }
 
-    private suspend fun log(message: String) = try {
+    protected suspend fun log(message: String) = try {
         logger.log(message)
     } catch (error: Throwable) {
         log(error)
     }
 
-    private suspend fun log(error: Throwable) = try {
+    protected suspend fun log(error: Throwable) = try {
         logger.log(error)
     } catch (e: Throwable) {
     }
