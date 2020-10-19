@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version Kotlin.version
+    kotlin("multiplatform") version Kotlin.version
 }
 
 tasks.withType<KotlinCompile> {
@@ -14,15 +14,32 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-dependencies {
-    implementation(project(Kached.core))
-    implementation(Serializers.gson)
+kotlin {
+    jvm()
 
-    testImplementation(kotlin(Kotlin.testCommon))
-    testImplementation(kotlin(Kotlin.testAnnotationCommon))
-    testImplementation(kotlin(Kotlin.testJUnit))
-    testImplementation(Kotlin.Coroutines.test)
-    testImplementation(Test.MockK.core)
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(Kached.core))
+            }
+        }
+        val commonTest by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation(project(Kached.core))
+                implementation(Serializers.gson)
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin(Kotlin.testCommon))
+                implementation(kotlin(Kotlin.testAnnotationCommon))
+                implementation(kotlin(Kotlin.testJUnit))
+                implementation(Kotlin.Coroutines.test)
+                implementation(Test.MockK.core)
+            }
+        }
+    }
 }
 
 apply(from = "$rootDir/publisher.gradle")

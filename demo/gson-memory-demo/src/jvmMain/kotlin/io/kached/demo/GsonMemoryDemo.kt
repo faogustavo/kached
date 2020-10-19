@@ -1,9 +1,16 @@
+package io.kached.demo
+
 import com.google.gson.Gson
 import io.kached.Logger
 import io.kached.kached
 import io.kached.serializer.GsonSerializer
 import io.kached.storage.SimpleMemoryStorage
 import kotlinx.coroutines.runBlocking
+
+/**
+ * After you run the file, you will need to add the `-cp $Classpath$` to vm options;
+ * Otherwise, you will receive an error like this: `Error: Could not find or load main class`
+ */
 
 private object SimpleLogger : Logger {
     override suspend fun log(message: String) {
