@@ -27,6 +27,12 @@ include(":storage")
 include(":storage:simple-memory-storage")
 include(":storage:shared-prefs-storage")
 
+// Encryptors
+include(":encryptor")
+
+// Loggers
+include(":logger")
+
 // Demos
 include(":demo")
 include(":demo:gson-memory-demo")
