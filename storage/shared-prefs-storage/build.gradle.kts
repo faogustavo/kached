@@ -59,3 +59,5 @@ android {
         }
     }
 }
+
+apply(from = "$rootDir/publisher.gradle")

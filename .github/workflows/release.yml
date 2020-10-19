@@ -16,7 +16,7 @@ jobs:
           key: ${{ runner.OS }}-gradle-wraper-cache
 
       - name: Project Tests
-          run: ./gradlew jvmTest testDebugUnitTest
+        run: ./gradlew jvmTest testDebugUnitTest
   unixDeploy:
     needs: test
     runs-on: macos-latest

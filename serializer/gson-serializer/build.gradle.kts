@@ -24,3 +24,5 @@ dependencies {
     testImplementation(Kotlin.Coroutines.test)
     testImplementation(Test.MockK.core)
 }
+
+apply(from = "$rootDir/publisher.gradle")
