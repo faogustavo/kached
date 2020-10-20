@@ -38,4 +38,20 @@ class SynchronizedKachedImpl<V : Any> @PublishedApi internal constructor(
             super.get(key)
         }
     }
+
+    override suspend fun unset(key: String) {
+        log("Kached -> Locked waiting to call unset($key)")
+        return mutex.withLock(readKey) {
+            log("Kached -> Unlocked and calling unset($key)")
+            super.unset(key)
+        }
+    }
+
+    override suspend fun clear() {
+        log("Kached -> Locked waiting to call clear()")
+        return mutex.withLock(readKey) {
+            log("Kached -> Unlocked and calling clear()")
+            super.clear()
+        }
+    }
 }

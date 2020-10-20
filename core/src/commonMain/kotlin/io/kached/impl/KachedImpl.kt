@@ -77,6 +77,26 @@ open class KachedImpl<V : Any> @PublishedApi internal constructor(
         }
     }
 
+    override suspend fun unset(key: String) {
+        log("Kached -> unset($key)")
+        try {
+            storage.unset(key)
+        } catch (error: Throwable) {
+            log("Failed to unset value where key = $key")
+            log(error)
+        }
+    }
+
+    override suspend fun clear() {
+        log("Kached -> clear()")
+        try {
+            storage.clear()
+        } catch (error: Throwable) {
+            log("Failed to clear storage")
+            log(error)
+        }
+    }
+
     protected suspend fun log(message: String) = try {
         logger.log(message)
     } catch (error: Throwable) {

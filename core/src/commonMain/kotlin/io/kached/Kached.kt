@@ -7,6 +7,8 @@ import kotlin.reflect.typeOf
 interface Kached<V : Any> {
     suspend fun set(key: String, value: V)
     suspend fun get(key: String): V?
+    suspend fun unset(key: String)
+    suspend fun clear()
 }
 
 class KachedBuilder {

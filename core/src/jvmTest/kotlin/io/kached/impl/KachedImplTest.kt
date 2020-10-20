@@ -1,5 +1,10 @@
-package io.kached
+package io.kached.impl
 
+import io.kached.Encryptor
+import io.kached.Logger
+import io.kached.Serializer
+import io.kached.Storage
+import io.kached.kached
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -11,7 +16,7 @@ import org.junit.Test
 import kotlin.reflect.typeOf
 
 @ExperimentalCoroutinesApi
-class KachedTest {
+class KachedImplTest {
 
     class Person(val id: String, val name: String) {
         companion object {
@@ -31,10 +36,10 @@ class KachedTest {
 
     val subject by lazy {
         kached<Person> {
-            this.logger = this@KachedTest.logger
-            this.serializer = this@KachedTest.serializer
-            this.encryptor = this@KachedTest.encryptor
-            this.storage = this@KachedTest.storage
+            this.logger = this@KachedImplTest.logger
+            this.serializer = this@KachedImplTest.serializer
+            this.encryptor = this@KachedImplTest.encryptor
+            this.storage = this@KachedImplTest.storage
         }
     }
 
@@ -103,6 +108,54 @@ class KachedTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})") }
+    }
+
+    @Test
+    fun unset_shouldCallStorage() = runBlockingTest {
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.unset(Person.KEY)
+
+        coVerify { storage.unset(Person.KEY) }
+    }
+
+    @Test
+    fun unset_shouldLogSteps() = runBlockingTest {
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.unset(Person.KEY)
+
+        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})") }
+    }
+
+    @Test
+    fun clear_shouldCallStorage() = runBlockingTest {
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.clear()
+
+        coVerify { storage.clear() }
+    }
+
+    @Test
+    fun clear_shouldLogSteps() = runBlockingTest {
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.clear()
+
+        coVerify(exactly = 1) { logger.log("Kached -> clear()") }
     }
 
     @Test
@@ -193,6 +246,32 @@ class KachedTest {
     }
 
     @Test
+    fun unset_withError_logException() = runBlockingTest {
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = true, hasValue = true)
+
+        subject.unset(Person.KEY)
+
+        coVerify(exactly = 1) { storage.unset(Person.KEY) }
+        coVerify(exactly = 1) { logger.log("Failed to unset value where key = ${Person.KEY}") }
+    }
+
+    @Test
+    fun clear_withError_logException() = runBlockingTest {
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = true, hasValue = true)
+
+        subject.clear()
+
+        coVerify(exactly = 1) { storage.clear() }
+        coVerify(exactly = 1) { logger.log("Failed to clear storage") }
+    }
+
+    @Test
     fun set_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
         mockLogger(throwError = true)
         mockSerializer(throwError = false)
@@ -215,6 +294,32 @@ class KachedTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})") }
+        coVerify(exactly = 1) { logger.log(FakeException) }
+    }
+
+    @Test
+    fun unset_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
+        mockLogger(throwError = true)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.unset(Person.KEY)
+
+        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})") }
+        coVerify(exactly = 1) { logger.log(FakeException) }
+    }
+
+    @Test
+    fun clear_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
+        mockLogger(throwError = true)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.clear()
+
+        coVerify(exactly = 1) { logger.log("Kached -> clear()") }
         coVerify(exactly = 1) { logger.log(FakeException) }
     }
 
@@ -273,20 +378,26 @@ class KachedTest {
         storage = when {
             throwError -> {
                 mockk {
-                    coEvery { set(any(), any()) } throws FakeException
                     coEvery { this@mockk.get(any()) } throws FakeException
+                    coEvery { set(any(), any()) } throws FakeException
+                    coEvery { unset(any()) } throws FakeException
+                    coEvery { clear() } throws FakeException
                 }
             }
             hasValue -> {
                 mockk {
-                    coEvery { set(any(), any()) } just Runs
                     coEvery { this@mockk.get(any()) } returns Person.ENCRYPTED_VALUE
+                    coEvery { set(any(), any()) } just Runs
+                    coEvery { unset(any()) } just Runs
+                    coEvery { clear() } just Runs
                 }
             }
             else -> {
                 mockk {
-                    coEvery { set(any(), any()) } just Runs
                     coEvery { this@mockk.get(any()) } returns null
+                    coEvery { set(any(), any()) } just Runs
+                    coEvery { unset(any()) } just Runs
+                    coEvery { clear() } just Runs
                 }
             }
         }
