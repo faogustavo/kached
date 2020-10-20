@@ -22,4 +22,33 @@ class SimpleMemoryStorageTest {
 
         assertEquals(VALUE, subject[KEY])
     }
+
+    @Test
+    fun unset_afterPutItem_returnsNull() {
+        subject[KEY] = VALUE
+        subject.unset(KEY)
+
+        assertNull(subject[KEY])
+    }
+
+    @Test
+    fun clear_removesAllKeys() {
+        val randomQuantity = (1..10).random()
+
+        randomQuantity.repeat {
+            subject["$KEY.$it"] = VALUE
+        }
+
+        subject.clear()
+
+        randomQuantity.repeat {
+            assertNull(subject["$KEY.$it"])
+        }
+    }
+
+    private fun Int.repeat(block: (Int) -> Unit) {
+        for (i in 1..this) {
+            block(i)
+        }
+    }
 }

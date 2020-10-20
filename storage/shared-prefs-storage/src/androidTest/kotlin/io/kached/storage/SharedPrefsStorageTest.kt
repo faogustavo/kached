@@ -33,7 +33,7 @@ class SharedPrefsStorageTest {
     }
 
     @Test
-    fun get_withValue_returnsFromPrefs() {
+    fun get_withValue_callsGetString() {
         mock(valueFromPrefs = VALUE)
 
         val result = subject[KEY]
@@ -43,7 +43,7 @@ class SharedPrefsStorageTest {
     }
 
     @Test
-    fun set_putValueToPrefs() {
+    fun set_callsPutString() {
         mock()
 
         subject[KEY] = VALUE
@@ -53,13 +53,37 @@ class SharedPrefsStorageTest {
         verify(exactly = 1) { sharedPrefsEditor.apply() }
     }
 
+    @Test
+    fun unset_callsRemoveWithKey() {
+        mock()
+
+        subject.unset(KEY)
+
+        verify(exactly = 1) { sharedPrefs.edit() }
+        verify(exactly = 1) { sharedPrefsEditor.remove(KEY) }
+        verify(exactly = 1) { sharedPrefsEditor.apply() }
+    }
+
+    @Test
+    fun clear_callsClear() {
+        mock()
+
+        subject.clear()
+
+        verify(exactly = 1) { sharedPrefs.edit() }
+        verify(exactly = 1) { sharedPrefsEditor.clear() }
+        verify(exactly = 1) { sharedPrefsEditor.apply() }
+    }
+
     private fun mock(
         valueFromPrefs: String? = null
     ) {
         sharedPrefsEditor = mockk {
             every { putString(KEY, any()) } returns this
+            every { remove(KEY) } returns this
             every { commit() } returns true
             every { apply() } just Runs
+            every { clear() } returns this
         }
         sharedPrefs = mockk {
             every { edit() } returns sharedPrefsEditor

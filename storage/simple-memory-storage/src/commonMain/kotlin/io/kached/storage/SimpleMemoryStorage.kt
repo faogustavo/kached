@@ -11,4 +11,12 @@ class SimpleMemoryStorage : Storage {
     }
 
     override fun get(key: String): String? = store[key]
+
+    override fun unset(key: String) {
+        store.remove(key)
+    }
+
+    override fun clear() {
+        store.clear()
+    }
 }
