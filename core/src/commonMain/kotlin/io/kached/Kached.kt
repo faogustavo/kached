@@ -52,7 +52,7 @@ internal inline fun <reified V : Any> KachedBuilder.buildKachedImpl(): Kached<V>
     encryptor = this.encryptor,
     logger = this.logger,
     dataClass = V::class,
-    dataType = typeOf<V>()
+    dataType = typeOf<V>(),
 )
 
 @PublishedApi
@@ -63,5 +63,5 @@ internal inline fun <reified V : Any> KachedBuilder.buildSynchronizedKachedImpl(
     encryptor = this.encryptor,
     logger = this.logger,
     dataClass = V::class,
-    dataType = typeOf<V>()
+    dataType = typeOf<V>(),
 )

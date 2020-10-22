@@ -2,6 +2,7 @@ package io.kached.demo
 
 import com.google.gson.Gson
 import io.kached.Logger
+import io.kached.LogLevel
 import io.kached.kached
 import io.kached.serializer.GsonSerializer
 import io.kached.storage.SimpleMemoryStorage
@@ -13,12 +14,12 @@ import kotlinx.coroutines.runBlocking
  */
 
 private object SimpleLogger : Logger {
-    override suspend fun log(message: String) {
-        println("[MESSAGE] $message")
+    override suspend fun log(message: String, level: LogLevel) {
+        println("[$level] $message")
     }
 
-    override suspend fun log(error: Throwable) {
-        println("[ERROR] ${error.stackTraceToString()}()")
+    override suspend fun log(error: Throwable, level: LogLevel) {
+        println("[$level] ${error.stackTraceToString()}()")
     }
 }
 
@@ -37,25 +38,25 @@ fun main() = runBlocking {
 
     println("[MAIN - Init]")
 
-    divider()
-    println("[MAIN - GET] '$key'")
-    println(cache.get(key))
+    get(key)
 
-    divider()
-    println("[MAIN - SET] '$key' = Data('$value1')")
-    cache.set(key, Data(value1))
+    set(key, Data(value1))
+    get(key)
 
-    divider()
-    println("[MAIN - GET] '$key'")
-    println(cache.get(key)?.value)
+    set(key, Data(value2))
+    get(key)
+}
 
-    divider()
-    println("[MAIN - SET] '$key' = Data('$value2')")
-    cache.set(key, Data(value2))
-
+private suspend fun get(key: String) {
     divider()
     println("[MAIN - GET] '$key'")
     println(cache.get(key)?.value)
+}
+
+private suspend fun set(key: String, value: Data) {
+    divider()
+    println("[MAIN - SET] '$key' = Data('$value')")
+    cache.set(key, value)
 }
 
 private fun divider() {

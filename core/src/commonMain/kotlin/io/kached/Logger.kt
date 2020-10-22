@@ -1,11 +1,11 @@
 package io.kached
 
 interface Logger {
-    suspend fun log(message: String)
-    suspend fun log(error: Throwable)
+    suspend fun log(message: String, level: LogLevel = LogLevel.Info)
+    suspend fun log(error: Throwable, level: LogLevel = LogLevel.Info)
 }
 
 internal object EmptyLogger : Logger {
-    override suspend fun log(message: String) {}
-    override suspend fun log(error: Throwable) {}
+    override suspend fun log(message: String, level: LogLevel) {}
+    override suspend fun log(error: Throwable, level: LogLevel) {}
 }

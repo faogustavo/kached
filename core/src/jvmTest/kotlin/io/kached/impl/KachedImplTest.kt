@@ -1,6 +1,7 @@
 package io.kached.impl
 
 import io.kached.Encryptor
+import io.kached.LogLevel
 import io.kached.Logger
 import io.kached.Serializer
 import io.kached.Storage
@@ -27,7 +28,10 @@ class KachedImplTest {
         }
     }
 
-    object FakeException : Throwable()
+    object LoggerError : Throwable()
+    object SerializationError : Throwable()
+    object EncryptorError : Throwable()
+    object StorageException : Throwable()
 
     lateinit var logger: Logger
     lateinit var serializer: Serializer
@@ -66,7 +70,7 @@ class KachedImplTest {
 
         subject.set(Person.KEY, Person.INSTANCE)
 
-        coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})") }
+        coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})", LogLevel.Info) }
     }
 
     @Test
@@ -93,7 +97,7 @@ class KachedImplTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { storage[Person.KEY] }
-        coVerify(exactly = 1) { logger.log("There is no value for key = ${Person.KEY}") }
+        coVerify(exactly = 1) { logger.log("There is no value for key = ${Person.KEY}", LogLevel.Warning) }
         coVerify(exactly = 0) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
     }
@@ -107,7 +111,7 @@ class KachedImplTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})") }
+        coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})", LogLevel.Info) }
     }
 
     @Test
@@ -131,7 +135,7 @@ class KachedImplTest {
 
         subject.unset(Person.KEY)
 
-        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})") }
+        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})", LogLevel.Info) }
     }
 
     @Test
@@ -155,7 +159,7 @@ class KachedImplTest {
 
         subject.clear()
 
-        coVerify(exactly = 1) { logger.log("Kached -> clear()") }
+        coVerify(exactly = 1) { logger.log("Kached -> clear()", LogLevel.Info) }
     }
 
     @Test
@@ -170,8 +174,8 @@ class KachedImplTest {
         coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
         coVerify(exactly = 0) { storage[any()] = any() }
         coVerify(exactly = 0) { encryptor.encrypt(Person.SERIAL_VALUE) }
-        coVerify(exactly = 1) { logger.log("Failed to serialize value with key = ${Person.KEY}") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Failed to serialize value with key = ${Person.KEY}", LogLevel.Warning) }
+        coVerify(exactly = 1) { logger.log(SerializationError, LogLevel.Error) }
     }
 
     @Test
@@ -185,8 +189,8 @@ class KachedImplTest {
 
         coVerify(exactly = 1) { encryptor.encrypt(Person.SERIAL_VALUE) }
         coVerify(exactly = 0) { storage[any()] = any() }
-        coVerify(exactly = 1) { logger.log("Failed to encrypt data with key = ${Person.KEY}") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Failed to encrypt data with key = ${Person.KEY}", LogLevel.Warning) }
+        coVerify(exactly = 1) { logger.log(EncryptorError, LogLevel.Error) }
     }
 
     @Test
@@ -199,8 +203,8 @@ class KachedImplTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { storage[Person.KEY] = Person.ENCRYPTED_VALUE }
-        coVerify(exactly = 1) { logger.log("Failed to store data with key = ${Person.KEY}") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Failed to store data with key = ${Person.KEY}", LogLevel.Warning) }
+        coVerify(exactly = 1) { logger.log(StorageException, LogLevel.Error) }
     }
 
     @Test
@@ -213,7 +217,13 @@ class KachedImplTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { storage[Person.KEY] }
-        coVerify(exactly = 1) { logger.log("Failed to acquire data from storage with key = ${Person.KEY}") }
+        coVerify(exactly = 1) {
+            logger.log(
+                "Failed to acquire data from storage with key = ${Person.KEY}",
+                LogLevel.Warning
+            )
+        }
+        coVerify(exactly = 1) { logger.log(StorageException, LogLevel.Error) }
         coVerify(exactly = 0) { encryptor.decrypt(any()) }
         coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
     }
@@ -228,7 +238,8 @@ class KachedImplTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
-        coVerify(exactly = 1) { logger.log("Failed to decrypt data with key = ${Person.KEY}") }
+        coVerify(exactly = 1) { logger.log("Failed to decrypt data with key = ${Person.KEY}", LogLevel.Warning) }
+        coVerify(exactly = 1) { logger.log(EncryptorError, LogLevel.Error) }
         coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
     }
 
@@ -242,7 +253,8 @@ class KachedImplTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE, Person::class, typeOf<Person>()) }
-        coVerify(exactly = 1) { logger.log("Failed to deserialize data with key = ${Person.KEY}") }
+        coVerify(exactly = 1) { logger.log("Failed to deserialize data with key = ${Person.KEY}", LogLevel.Warning) }
+        coVerify(exactly = 1) { logger.log(SerializationError, LogLevel.Error) }
     }
 
     @Test
@@ -255,7 +267,7 @@ class KachedImplTest {
         subject.unset(Person.KEY)
 
         coVerify(exactly = 1) { storage.unset(Person.KEY) }
-        coVerify(exactly = 1) { logger.log("Failed to unset value where key = ${Person.KEY}") }
+        coVerify(exactly = 1) { logger.log("Failed to unset value where key = ${Person.KEY}", LogLevel.Warning) }
     }
 
     @Test
@@ -268,7 +280,7 @@ class KachedImplTest {
         subject.clear()
 
         coVerify(exactly = 1) { storage.clear() }
-        coVerify(exactly = 1) { logger.log("Failed to clear storage") }
+        coVerify(exactly = 1) { logger.log("Failed to clear storage", LogLevel.Warning) }
     }
 
     @Test
@@ -280,8 +292,8 @@ class KachedImplTest {
 
         subject.set(Person.KEY, Person.INSTANCE)
 
-        coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     @Test
@@ -293,8 +305,8 @@ class KachedImplTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     @Test
@@ -306,8 +318,8 @@ class KachedImplTest {
 
         subject.unset(Person.KEY)
 
-        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     @Test
@@ -319,8 +331,8 @@ class KachedImplTest {
 
         subject.clear()
 
-        coVerify(exactly = 1) { logger.log("Kached -> clear()") }
-        coVerify(exactly = 1) { logger.log(FakeException) }
+        coVerify(exactly = 1) { logger.log("Kached -> clear()", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     private fun mockLogger(
@@ -328,13 +340,13 @@ class KachedImplTest {
     ) {
         logger = if (throwError) {
             mockk {
-                coEvery { log(any<String>()) } throws FakeException
-                coEvery { log(any<Throwable>()) } throws FakeException
+                coEvery { log(any<String>(), any()) } throws LoggerError
+                coEvery { log(any<Throwable>(), any()) } throws LoggerError
             }
         } else {
             mockk {
-                coEvery { log(any<String>()) } just Runs
-                coEvery { log(any<Throwable>()) } just Runs
+                coEvery { log(any<String>(), any()) } just Runs
+                coEvery { log(any<Throwable>(), any()) } just Runs
             }
         }
     }
@@ -344,8 +356,8 @@ class KachedImplTest {
     ) {
         serializer = if (throwError) {
             mockk {
-                coEvery { serialize(any()) } throws FakeException
-                coEvery { deserialize<Person>(any(), any(), any()) } throws FakeException
+                coEvery { serialize(any()) } throws SerializationError
+                coEvery { deserialize<Person>(any(), any(), any()) } throws SerializationError
             }
         } else {
             mockk {
@@ -360,8 +372,8 @@ class KachedImplTest {
     ) {
         encryptor = if (throwError) {
             mockk {
-                coEvery { encrypt(any()) } throws FakeException
-                coEvery { decrypt(any()) } throws FakeException
+                coEvery { encrypt(any()) } throws EncryptorError
+                coEvery { decrypt(any()) } throws EncryptorError
             }
         } else {
             mockk {
@@ -378,10 +390,10 @@ class KachedImplTest {
         storage = when {
             throwError -> {
                 mockk {
-                    coEvery { this@mockk.get(any()) } throws FakeException
-                    coEvery { set(any(), any()) } throws FakeException
-                    coEvery { unset(any()) } throws FakeException
-                    coEvery { clear() } throws FakeException
+                    coEvery { this@mockk.get(any()) } throws StorageException
+                    coEvery { set(any(), any()) } throws StorageException
+                    coEvery { unset(any()) } throws StorageException
+                    coEvery { clear() } throws StorageException
                 }
             }
             hasValue -> {

@@ -49,3 +49,4 @@ local.properties
 buildSrcTmp/
 distTmp/
 outTmp/
+*.hprof
