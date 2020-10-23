@@ -32,6 +32,7 @@ include(":encryptor")
 
 // Loggers
 include(":logger")
+include(":logger:simple-logger")
 
 // Demos
 include(":demo")

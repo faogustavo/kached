@@ -17,6 +17,7 @@ An user-friendly, modular and secure key value storage.
 ```kotlin
 // Create your kached instance
 val cache = kached<String> {
+    logger = SimpleLogger()
     serializer = GsonSerializer(Gson())
     storage = SimpleMemoryStorage()
 }
@@ -97,5 +98,5 @@ implementation "io.kached:simple-memory-storage:$version"
 // TODO: Implement encryption libs
 
 // [Optional] Choose one logger
-// TODO: Implement logger libs
+implementation "io.kached:simple-logger:$version"
 ```
