@@ -99,4 +99,5 @@ implementation "io.kached:simple-memory-storage:$version"
 
 // [Optional] Choose one logger
 implementation "io.kached:simple-logger:$version"
+implementation "io.kached:android-logger:$version"
 ```

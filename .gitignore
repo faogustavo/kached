@@ -50,3 +50,4 @@ buildSrcTmp/
 distTmp/
 outTmp/
 *.hprof
+*.ser
