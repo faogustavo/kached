@@ -4,7 +4,7 @@ import io.kached.Storage
 
 class SimpleMemoryStorage : Storage {
 
-    private val store = HashMap<String, String>()
+    private val store = LinkedHashMap<String, String>()
 
     override fun set(key: String, data: String) {
         store[key] = data
