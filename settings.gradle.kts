@@ -26,6 +26,7 @@ include(":serializer:gson-serializer")
 include(":storage")
 include(":storage:simple-memory-storage")
 include(":storage:shared-prefs-storage")
+include(":storage:file-storage")
 
 // Encryptors
 include(":encryptor")
