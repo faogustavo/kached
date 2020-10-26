@@ -1,5 +1,6 @@
 package io.kached.storage
 
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -12,43 +13,37 @@ class SimpleMemoryStorageTest {
     private val subject = SimpleMemoryStorage()
 
     @Test
-    fun get_withoutItem_returnsNull() {
-        assertNull(subject[KEY])
+    fun get_withoutItem_returnsNull() = runBlockingTest {
+        assertNull(subject.get(KEY))
     }
 
     @Test
-    fun get_withPutItem_returnsItem() {
-        subject[KEY] = VALUE
+    fun get_withPutItem_returnsItem() = runBlockingTest {
+        subject.set(KEY, VALUE)
 
-        assertEquals(VALUE, subject[KEY])
+        assertEquals(VALUE, subject.get(KEY))
     }
 
     @Test
-    fun unset_afterPutItem_returnsNull() {
-        subject[KEY] = VALUE
+    fun unset_afterPutItem_returnsNull() = runBlockingTest {
+        subject.set(KEY, VALUE)
         subject.unset(KEY)
 
-        assertNull(subject[KEY])
+        assertNull(subject.get(KEY))
     }
 
     @Test
-    fun clear_removesAllKeys() {
+    fun clear_removesAllKeys() = runBlockingTest {
         val randomQuantity = (1..10).random()
 
-        randomQuantity.repeat {
-            subject["$KEY.$it"] = VALUE
+        repeat(randomQuantity) {
+            subject.set("$KEY.$it", VALUE)
         }
 
         subject.clear()
 
-        randomQuantity.repeat {
-            assertNull(subject["$KEY.$it"])
-        }
-    }
-
-    private fun Int.repeat(block: (Int) -> Unit) {
-        for (i in 1..this) {
-            block(i)
+        repeat(randomQuantity) {
+            assertNull(subject.get("$KEY.$it"))
         }
     }
 }

@@ -16,15 +16,15 @@ class SharedPrefsStorage constructor(
         name: String = DEFAULT_STORAGE_NAME
     ) : this(context.getSharedPreferences(name, Context.MODE_PRIVATE))
 
-    override fun set(key: String, data: String) =
+    override suspend fun set(key: String, data: String) =
         prefs.edit { this.putString(key, data) }
 
-    override fun get(key: String): String? =
+    override suspend fun get(key: String): String? =
         prefs.getString(key, null)
 
-    override fun unset(key: String) =
+    override suspend fun unset(key: String) =
         prefs.edit { remove(key) }
 
-    override fun clear() =
+    override suspend fun clear() =
         prefs.edit { clear() }
 }

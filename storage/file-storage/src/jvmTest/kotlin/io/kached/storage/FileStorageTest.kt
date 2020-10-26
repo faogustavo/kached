@@ -28,14 +28,14 @@ class FileStorageTest {
 
     @Test
     fun set_writeToDirectory() = runBlockingTest {
-        subject[KEY] = VALUE
+        subject.set(KEY, VALUE)
 
         verify(exactly = 1) { directory.writeFile(KEY, VALUE) }
     }
 
     @Test
     fun get_readFromDirectory() = runBlockingTest {
-        subject[KEY]
+        subject.get(KEY)
 
         verify(exactly = 1) { directory.readFile(KEY) }
     }

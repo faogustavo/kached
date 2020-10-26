@@ -7,17 +7,17 @@ class FileStorage constructor(
     private val directory: Directory,
 ) : Storage {
 
-    override fun set(key: String, data: String) {
+    override suspend fun set(key: String, data: String) {
         directory.writeFile(key, data)
     }
 
-    override fun get(key: String): String? = directory.readFile(key)
+    override suspend fun get(key: String): String? = directory.readFile(key)
 
-    override fun unset(key: String) {
+    override suspend fun unset(key: String) {
         directory.deleteFile(key)
     }
 
-    override fun clear() {
+    override suspend fun clear() {
         directory.clear()
     }
 }

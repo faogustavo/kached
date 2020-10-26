@@ -36,6 +36,7 @@ kotlin {
                 implementation(kotlin(Kotlin.testAnnotationCommon))
                 implementation(kotlin(Kotlin.testJUnit))
                 implementation(Kotlin.Coroutines.test)
+                implementation(Test.MockK.core)
             }
         }
     }

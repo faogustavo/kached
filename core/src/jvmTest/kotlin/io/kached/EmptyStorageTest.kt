@@ -20,7 +20,7 @@ class EmptyStorageTest {
     @Test
     fun serialize_shouldThrown() = runBlockingTest {
         try {
-            EmptyStorage["1"] = "Gustavo"
+            EmptyStorage.set("1", "Gustavo")
             fail("Put must thrown an exception")
         } catch (e: Throwable) {
             assertTrue(e is RuntimeException)

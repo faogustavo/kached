@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -23,30 +24,30 @@ class SharedPrefsStorageTest {
     }
 
     @Test
-    fun get_withoutValue_returnsNullFromPrefs() {
+    fun get_withoutValue_returnsNullFromPrefs() = runBlockingTest {
         mock(valueFromPrefs = null)
 
-        val result = subject[KEY]
+        val result = subject.get(KEY)
 
         assertNull(result)
         verify(exactly = 1) { sharedPrefs.getString(KEY, null) }
     }
 
     @Test
-    fun get_withValue_callsGetString() {
+    fun get_withValue_callsGetString() = runBlockingTest {
         mock(valueFromPrefs = VALUE)
 
-        val result = subject[KEY]
+        val result = subject.get(KEY)
 
         assertEquals(VALUE, result)
         verify(exactly = 1) { sharedPrefs.getString(KEY, null) }
     }
 
     @Test
-    fun set_callsPutString() {
+    fun set_callsPutString() = runBlockingTest {
         mock()
 
-        subject[KEY] = VALUE
+        subject.set(KEY, VALUE)
 
         verify(exactly = 1) { sharedPrefs.edit() }
         verify(exactly = 1) { sharedPrefsEditor.putString(KEY, VALUE) }
@@ -54,7 +55,7 @@ class SharedPrefsStorageTest {
     }
 
     @Test
-    fun unset_callsRemoveWithKey() {
+    fun unset_callsRemoveWithKey() = runBlockingTest {
         mock()
 
         subject.unset(KEY)
@@ -65,7 +66,7 @@ class SharedPrefsStorageTest {
     }
 
     @Test
-    fun clear_callsClear() {
+    fun clear_callsClear() = runBlockingTest {
         mock()
 
         subject.clear()

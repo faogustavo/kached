@@ -58,7 +58,7 @@ class KachedImplTest {
 
         coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
         coVerify(exactly = 1) { encryptor.encrypt(Person.SERIAL_VALUE) }
-        coVerify(exactly = 1) { storage[Person.KEY] = Person.ENCRYPTED_VALUE }
+        coVerify(exactly = 1) { storage.set(Person.KEY, Person.ENCRYPTED_VALUE) }
     }
 
     @Test
@@ -82,7 +82,7 @@ class KachedImplTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { storage[Person.KEY] }
+        coVerify(exactly = 1) { storage.get(Person.KEY) }
         coVerify(exactly = 1) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE, Person::class, typeOf<Person>()) }
     }
@@ -96,7 +96,7 @@ class KachedImplTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { storage[Person.KEY] }
+        coVerify(exactly = 1) { storage.get(Person.KEY) }
         coVerify(exactly = 1) { logger.log("There is no value for key = ${Person.KEY}", LogLevel.Warning) }
         coVerify(exactly = 0) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 0) { serializer.deserialize(any(), any(), any()) }
@@ -172,7 +172,7 @@ class KachedImplTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
-        coVerify(exactly = 0) { storage[any()] = any() }
+        coVerify(exactly = 0) { storage.set(any(), any()) }
         coVerify(exactly = 0) { encryptor.encrypt(Person.SERIAL_VALUE) }
         coVerify(exactly = 1) { logger.log("Failed to serialize value with key = ${Person.KEY}", LogLevel.Warning) }
         coVerify(exactly = 1) { logger.log(SerializationError, LogLevel.Error) }
@@ -188,7 +188,7 @@ class KachedImplTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { encryptor.encrypt(Person.SERIAL_VALUE) }
-        coVerify(exactly = 0) { storage[any()] = any() }
+        coVerify(exactly = 0) { storage.set(any(), any()) }
         coVerify(exactly = 1) { logger.log("Failed to encrypt data with key = ${Person.KEY}", LogLevel.Warning) }
         coVerify(exactly = 1) { logger.log(EncryptorError, LogLevel.Error) }
     }
@@ -202,7 +202,7 @@ class KachedImplTest {
 
         subject.set(Person.KEY, Person.INSTANCE)
 
-        coVerify(exactly = 1) { storage[Person.KEY] = Person.ENCRYPTED_VALUE }
+        coVerify(exactly = 1) { storage.set(Person.KEY, Person.ENCRYPTED_VALUE) }
         coVerify(exactly = 1) { logger.log("Failed to store data with key = ${Person.KEY}", LogLevel.Warning) }
         coVerify(exactly = 1) { logger.log(StorageException, LogLevel.Error) }
     }
@@ -216,7 +216,7 @@ class KachedImplTest {
 
         subject.get(Person.KEY)
 
-        coVerify(exactly = 1) { storage[Person.KEY] }
+        coVerify(exactly = 1) { storage.get(Person.KEY) }
         coVerify(exactly = 1) {
             logger.log(
                 "Failed to acquire data from storage with key = ${Person.KEY}",

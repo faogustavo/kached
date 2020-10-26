@@ -1,28 +1,28 @@
 package io.kached
 
 interface Storage {
-    operator fun set(key: String, data: String)
-    operator fun get(key: String): String?
-    fun unset(key: String)
-    fun clear()
+    suspend fun set(key: String, data: String)
+    suspend fun get(key: String): String?
+    suspend fun unset(key: String)
+    suspend fun clear()
 }
 
 internal object EmptyStorage : Storage {
     private const val ERROR_MESSAGE = "No storage was provided"
 
-    override fun set(key: String, data: String) {
+    override suspend fun set(key: String, data: String) {
         throw RuntimeException(ERROR_MESSAGE)
     }
 
-    override fun get(key: String): String? {
+    override suspend fun get(key: String): String? {
         throw RuntimeException(ERROR_MESSAGE)
     }
 
-    override fun unset(key: String) {
+    override suspend fun unset(key: String) {
         throw RuntimeException(ERROR_MESSAGE)
     }
 
-    override fun clear() {
+    override suspend fun clear() {
         throw RuntimeException(ERROR_MESSAGE)
     }
 }

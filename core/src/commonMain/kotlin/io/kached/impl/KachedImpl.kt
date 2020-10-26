@@ -38,7 +38,7 @@ open class KachedImpl<V : Any> @PublishedApi internal constructor(
         }
 
         try {
-            storage[key] = encryptedValue
+            storage.set(key, encryptedValue)
         } catch (error: Throwable) {
             log("Failed to store data with key = $key", LogLevel.Warning)
             log(error, LogLevel.Error)
@@ -49,7 +49,7 @@ open class KachedImpl<V : Any> @PublishedApi internal constructor(
         log("Kached -> get($key)", LogLevel.Info)
 
         val valueFromStorage = try {
-            storage[key]
+            storage.get(key)
         } catch (error: Throwable) {
             log("Failed to acquire data from storage with key = $key", LogLevel.Warning)
             log(error, LogLevel.Error)
