@@ -31,6 +31,7 @@ object Test {
 
     object MockK {
         const val core = "io.mockk:mockk:1.10.2"
+        const val common = "io.mockk:mockk-common:1.10.2"
     }
 }
 

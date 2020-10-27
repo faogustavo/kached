@@ -77,7 +77,6 @@ actual class Directory {
     private fun <T> tryOrNull(block: () -> T): T? = try {
         block()
     } catch (error: Throwable) {
-        throw error
         null
     }
 }
