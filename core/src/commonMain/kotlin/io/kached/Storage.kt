@@ -7,7 +7,10 @@ interface Storage<T : Any> {
     suspend fun clear()
 }
 
-internal object EmptyStorage : Storage<String> {
+interface StringStorage : Storage<String>
+interface RawStorage<T : Any> : Storage<T>
+
+internal object EmptyStorage : StringStorage {
     private const val ERROR_MESSAGE = "No storage was provided"
 
     override suspend fun set(key: String, data: String) {

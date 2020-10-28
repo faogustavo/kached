@@ -24,7 +24,6 @@ include(":serializer:gson-serializer")
 
 // Storage
 include(":storage")
-include(":storage:simple-memory-storage")
 include(":storage:shared-prefs-storage")
 include(":storage:file-storage")
 include(":storage:user-defaults-storage")

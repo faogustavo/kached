@@ -3,13 +3,13 @@ package io.kached.storage
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import io.kached.Storage
+import io.kached.StringStorage
 
 private const val DEFAULT_STORAGE_NAME = "kached_default_store"
 
 class SharedPrefsStorage constructor(
     private val prefs: SharedPreferences
-) : Storage<String> {
+) : StringStorage {
 
     constructor(
         context: Context,

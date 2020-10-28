@@ -92,7 +92,6 @@ implementation "io.kached:gson-serializer:$version"
 
 // Pick one storage
 implementation "io.kached:shared-prefs-storage:$version"
-implementation "io.kached:simple-memory-storage:$version"
 implementation "io.kached:file-storage:$version"
 
 // [Optional] Choose one encryptor

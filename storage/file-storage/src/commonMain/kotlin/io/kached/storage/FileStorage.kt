@@ -1,11 +1,11 @@
 package io.kached.storage
 
-import io.kached.Storage
+import io.kached.StringStorage
 import io.kached.utils.Directory
 
 class FileStorage constructor(
     private val directory: Directory,
-) : Storage<String> {
+) : StringStorage {
 
     override suspend fun set(key: String, data: String) {
         directory.writeFile(key, data)
