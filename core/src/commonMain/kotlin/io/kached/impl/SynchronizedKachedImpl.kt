@@ -14,7 +14,7 @@ class CachedLocker
 
 class SynchronizedKachedImpl<V : Any> @PublishedApi internal constructor(
     serializer: Serializer,
-    storage: Storage,
+    storage: Storage<String>,
     encryptor: Encryptor,
     logger: Logger,
     dataClass: KClass<V>,

@@ -9,7 +9,7 @@ private const val DEFAULT_STORAGE_NAME = "kached_default_store"
 
 class SharedPrefsStorage constructor(
     private val prefs: SharedPreferences
-) : Storage {
+) : Storage<String> {
 
     constructor(
         context: Context,

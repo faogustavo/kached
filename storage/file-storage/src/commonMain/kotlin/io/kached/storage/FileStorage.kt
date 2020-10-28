@@ -5,7 +5,7 @@ import io.kached.utils.Directory
 
 class FileStorage constructor(
     private val directory: Directory,
-) : Storage {
+) : Storage<String> {
 
     override suspend fun set(key: String, data: String) {
         directory.writeFile(key, data)

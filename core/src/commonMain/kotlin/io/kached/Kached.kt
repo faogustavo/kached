@@ -13,13 +13,13 @@ interface Kached<V : Any> {
 
 class KachedBuilder {
     var serializer: Serializer = EmptySerializer
-    var storage: Storage = EmptyStorage
+    var storage: Storage<String> = EmptyStorage
     var encryptor: Encryptor = EmptyEncryptor
     var logger: Logger = EmptyLogger
 
     fun copy(
         serializer: Serializer = this.serializer,
-        storage: Storage = this.storage,
+        storage: Storage<String> = this.storage,
         encryptor: Encryptor = this.encryptor,
         logger: Logger = this.logger,
     ) = KachedBuilder().apply {

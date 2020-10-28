@@ -36,7 +36,7 @@ class KachedImplTest {
     lateinit var logger: Logger
     lateinit var serializer: Serializer
     lateinit var encryptor: Encryptor
-    lateinit var storage: Storage
+    lateinit var storage: Storage<String>
 
     val subject by lazy {
         kached<Person> {

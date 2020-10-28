@@ -8,7 +8,7 @@ private const val DEFAULT_STORAGE_NAME = "kached_default_store"
 class UserDefaultsStorage constructor(
     private val suiteName: String = DEFAULT_STORAGE_NAME,
     private val userDefaults: NSUserDefaults = NSUserDefaults(suiteName = suiteName)
-) : Storage {
+) : Storage<String> {
 
     override suspend fun set(key: String, data: String) {
         userDefaults.setObject(data, key)

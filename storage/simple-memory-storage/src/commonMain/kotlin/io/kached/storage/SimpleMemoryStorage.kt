@@ -2,7 +2,7 @@ package io.kached.storage
 
 import io.kached.Storage
 
-class SimpleMemoryStorage : Storage {
+class SimpleMemoryStorage : Storage<String> {
 
     private val store = LinkedHashMap<String, String>()
 

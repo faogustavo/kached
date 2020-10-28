@@ -11,7 +11,7 @@ import kotlin.reflect.KType
 
 open class KachedImpl<V : Any> @PublishedApi internal constructor(
     private val serializer: Serializer,
-    private val storage: Storage,
+    private val storage: Storage<String>,
     private val encryptor: Encryptor,
     private val logger: Logger,
     private val dataClass: KClass<V>,
