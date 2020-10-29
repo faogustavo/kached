@@ -54,7 +54,7 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting{
+        val commonMain by getting {
             dependencies {
                 implementation(project(Kached.core))
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")

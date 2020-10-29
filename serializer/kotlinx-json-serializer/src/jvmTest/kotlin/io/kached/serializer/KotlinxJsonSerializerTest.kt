@@ -1,14 +1,10 @@
 package io.kached.serializer
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
 import kotlin.reflect.typeOf
 
@@ -28,11 +24,9 @@ class KotlinxJsonSerializerTest {
         }
     }
 
-
     @Test
     fun serializeWithKotlinxJsonSerializer() = runBlockingTest {
         val str = serializer.serialize(Person.INSTANCE, Person.KCLASS, Person.KTYPE)
-        println(str)
         Assert.assertEquals(Person.JSON, str)
     }
 
