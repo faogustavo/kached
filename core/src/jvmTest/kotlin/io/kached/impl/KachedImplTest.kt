@@ -5,6 +5,7 @@ import io.kached.LogLevel
 import io.kached.Logger
 import io.kached.Serializer
 import io.kached.Storage
+import io.kached.StorageType
 import io.kached.kached
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -32,11 +33,14 @@ class KachedImplTest {
     object SerializationError : Throwable()
     object EncryptorError : Throwable()
     object StorageException : Throwable()
+    object MemoryStorageException : Throwable()
 
-    lateinit var logger: Logger
-    lateinit var serializer: Serializer
-    lateinit var encryptor: Encryptor
-    lateinit var storage: Storage<String>
+    private lateinit var logger: Logger
+    private lateinit var serializer: Serializer
+    private lateinit var encryptor: Encryptor
+    private lateinit var storage: Storage<String>
+    private lateinit var memoryStorage: Storage<Person>
+    private var storageType = StorageType.ONLY_DISK
 
     val subject by lazy {
         kached<Person> {
@@ -44,11 +48,14 @@ class KachedImplTest {
             this.serializer = this@KachedImplTest.serializer
             this.encryptor = this@KachedImplTest.encryptor
             this.storage = this@KachedImplTest.storage
+            this.storageType = this@KachedImplTest.storageType
+            this.memoryStorageBuilder = { memoryStorage }
         }
     }
 
     @Test
     fun set_shouldSerializeEncryptAndStore() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -63,6 +70,7 @@ class KachedImplTest {
 
     @Test
     fun set_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -71,10 +79,41 @@ class KachedImplTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Storing value in disk", LogLevel.Info) }
+    }
+
+    @Test
+    fun set_withMemoryStorage_savesItToMemory() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.set(Person.KEY, Person.INSTANCE)
+
+        coVerify(exactly = 1) { memoryStorage.set(Person.KEY, Person.INSTANCE) }
+    }
+
+    @Test
+    fun set_withMemoryStorage_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.set(Person.KEY, Person.INSTANCE)
+
+        coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Storing value in memory", LogLevel.Info) }
     }
 
     @Test
     fun get_shouldGetFromStoreDecryptAndDeserialize() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -89,6 +128,7 @@ class KachedImplTest {
 
     @Test
     fun get_withStoreReturningNull_returnsImmediately() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -112,10 +152,74 @@ class KachedImplTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Trying to get value from disk", LogLevel.Info) }
+    }
+
+    @Test
+    fun get_withMemoryStorage_getValueFromIt() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.get(Person.KEY)
+
+        coVerify(exactly = 1) { memoryStorage.get(Person.KEY) }
+    }
+
+    @Test
+    fun get_withMixedStorageAndMemoryValue_notGetFromStorage() = runBlockingTest {
+        storageType = StorageType.MIXED
+        mockMemoryStorage(throwError = false, hasValue = true)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.get(Person.KEY)
+
+        coVerify(exactly = 1) { memoryStorage.get(Person.KEY) }
+        coVerify(exactly = 0) { storage.get(Person.KEY) }
+    }
+
+    @Test
+    fun get_withMixedStorageAndNoMemoryValue_getFromStorage() = runBlockingTest {
+        storageType = StorageType.MIXED
+        mockMemoryStorage(throwError = false, hasValue = false)
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.get(Person.KEY)
+
+        coVerify(exactly = 1) { memoryStorage.get(Person.KEY) }
+        coVerify(exactly = 1) { storage.get(Person.KEY) }
+        coVerify(exactly = 1) { encryptor.decrypt(Person.ENCRYPTED_VALUE) }
+        coVerify(exactly = 1) { serializer.deserialize(Person.SERIAL_VALUE, Person::class, typeOf<Person>()) }
+        coVerify(exactly = 1) { memoryStorage.set(Person.KEY, Person.INSTANCE) }
+    }
+
+    @Test
+    fun get_withMemoryStorage_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.get(Person.KEY)
+
+        coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Trying to get value from memory", LogLevel.Info) }
     }
 
     @Test
     fun unset_shouldCallStorage() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -128,6 +232,7 @@ class KachedImplTest {
 
     @Test
     fun unset_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -136,10 +241,41 @@ class KachedImplTest {
         subject.unset(Person.KEY)
 
         coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Removing value from disk", LogLevel.Info) }
+    }
+
+    @Test
+    fun unset_withMemoryStorage_shouldCallStorage() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.unset(Person.KEY)
+
+        coVerify { memoryStorage.unset(Person.KEY) }
+    }
+
+    @Test
+    fun unset_withMemoryStorage_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.unset(Person.KEY)
+
+        coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Removing value from memory", LogLevel.Info) }
     }
 
     @Test
     fun clear_shouldCallStorage() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -147,11 +283,12 @@ class KachedImplTest {
 
         subject.clear()
 
-        coVerify { storage.clear() }
+        coVerify(exactly = 1) { storage.clear() }
     }
 
     @Test
     fun clear_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -160,10 +297,41 @@ class KachedImplTest {
         subject.clear()
 
         coVerify(exactly = 1) { logger.log("Kached -> clear()", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Clearing values from disk", LogLevel.Info) }
+    }
+
+    @Test
+    fun clear_withMemoryStorage_shouldCallStorage() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.clear()
+
+        coVerify(exactly = 1) { memoryStorage.clear() }
+    }
+
+    @Test
+    fun clear_withMemoryStorage_shouldLogSteps() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = false)
+        mockLogger(throwError = false)
+        mockSerializer(throwError = false)
+        mockEncryptor(throwError = false)
+        mockStorage(throwError = false, hasValue = true)
+
+        subject.clear()
+
+        coVerify(exactly = 1) { logger.log("Kached -> clear()", LogLevel.Info) }
+        coVerify(exactly = 1) { logger.log("Clearing values from memory", LogLevel.Info) }
     }
 
     @Test
     fun set_withErrorSerializingValue_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = true)
         mockEncryptor(throwError = false)
@@ -180,6 +348,7 @@ class KachedImplTest {
 
     @Test
     fun set_withErrorEncryptingValue_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = true)
@@ -195,6 +364,7 @@ class KachedImplTest {
 
     @Test
     fun set_withErrorStoringValue_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -208,7 +378,28 @@ class KachedImplTest {
     }
 
     @Test
+    fun set_withMemoryStorageAndErrorStoringValue_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = true)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.set(Person.KEY, Person.INSTANCE)
+
+        coVerify(exactly = 1) { memoryStorage.set(Person.KEY, Person.INSTANCE) }
+        coVerify(exactly = 1) {
+            logger.log(
+                "Failed to store data with key = ${Person.KEY} in memory",
+                LogLevel.Warning
+            )
+        }
+    }
+
+    @Test
     fun get_withErrorGettingFromStore_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -230,6 +421,7 @@ class KachedImplTest {
 
     @Test
     fun get_withErrorDecryptingValue_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = true)
@@ -245,6 +437,7 @@ class KachedImplTest {
 
     @Test
     fun get_withErrorDeserializing_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = true)
         mockEncryptor(throwError = false)
@@ -258,7 +451,28 @@ class KachedImplTest {
     }
 
     @Test
+    fun get_withMemoryStorageAndErrorStoringValue_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = true)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.get(Person.KEY)
+
+        coVerify(exactly = 1) { memoryStorage.get(Person.KEY) }
+        coVerify(exactly = 1) {
+            logger.log(
+                "Failed to acquire data from memory storage with key = ${Person.KEY}",
+                LogLevel.Warning
+            )
+        }
+    }
+
+    @Test
     fun unset_withError_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -271,7 +485,28 @@ class KachedImplTest {
     }
 
     @Test
+    fun unset_withMemoryStorag1eAndError_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = true)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.unset(Person.KEY)
+
+        coVerify(exactly = 1) { memoryStorage.unset(Person.KEY) }
+        coVerify(exactly = 1) {
+            logger.log(
+                "Failed to unset value from memory where key = ${Person.KEY}",
+                LogLevel.Warning
+            )
+        }
+    }
+
+    @Test
     fun clear_withError_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = false)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -284,7 +519,23 @@ class KachedImplTest {
     }
 
     @Test
+    fun clear_withMemoryStorageAndError_logException() = runBlockingTest {
+        storageType = StorageType.ONLY_MEMORY
+        mockMemoryStorage(throwError = true)
+        mockLogger()
+        mockSerializer()
+        mockEncryptor()
+        mockStorage()
+
+        subject.clear()
+
+        coVerify(exactly = 1) { memoryStorage.clear() }
+        coVerify(exactly = 1) { logger.log("Failed to clear memory storage", LogLevel.Warning) }
+    }
+
+    @Test
     fun set_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = true)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -293,11 +544,12 @@ class KachedImplTest {
         subject.set(Person.KEY, Person.INSTANCE)
 
         coVerify(exactly = 1) { logger.log("Kached -> set(${Person.KEY})", LogLevel.Info) }
-        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
+        coVerify(exactly = 2) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     @Test
     fun get_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = true)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -306,11 +558,12 @@ class KachedImplTest {
         subject.get(Person.KEY)
 
         coVerify(exactly = 1) { logger.log("Kached -> get(${Person.KEY})", LogLevel.Info) }
-        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
+        coVerify(exactly = 2) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     @Test
     fun unset_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = true)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -319,11 +572,12 @@ class KachedImplTest {
         subject.unset(Person.KEY)
 
         coVerify(exactly = 1) { logger.log("Kached -> unset(${Person.KEY})", LogLevel.Info) }
-        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
+        coVerify(exactly = 2) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     @Test
     fun clear_withLoggerThrowingException_tryLogCatchException() = runBlockingTest {
+        storageType = StorageType.ONLY_DISK
         mockLogger(throwError = true)
         mockSerializer(throwError = false)
         mockEncryptor(throwError = false)
@@ -332,7 +586,7 @@ class KachedImplTest {
         subject.clear()
 
         coVerify(exactly = 1) { logger.log("Kached -> clear()", LogLevel.Info) }
-        coVerify(exactly = 1) { logger.log(LoggerError, LogLevel.Error) }
+        coVerify(exactly = 2) { logger.log(LoggerError, LogLevel.Error) }
     }
 
     private fun mockLogger(
@@ -399,6 +653,38 @@ class KachedImplTest {
             hasValue -> {
                 mockk {
                     coEvery { this@mockk.get(any()) } returns Person.ENCRYPTED_VALUE
+                    coEvery { set(any(), any()) } just Runs
+                    coEvery { unset(any()) } just Runs
+                    coEvery { clear() } just Runs
+                }
+            }
+            else -> {
+                mockk {
+                    coEvery { this@mockk.get(any()) } returns null
+                    coEvery { set(any(), any()) } just Runs
+                    coEvery { unset(any()) } just Runs
+                    coEvery { clear() } just Runs
+                }
+            }
+        }
+    }
+
+    private fun mockMemoryStorage(
+        throwError: Boolean = false,
+        hasValue: Boolean = false,
+    ) {
+        memoryStorage = when {
+            throwError -> {
+                mockk {
+                    coEvery { this@mockk.get(any()) } throws MemoryStorageException
+                    coEvery { set(any(), any()) } throws MemoryStorageException
+                    coEvery { unset(any()) } throws MemoryStorageException
+                    coEvery { clear() } throws MemoryStorageException
+                }
+            }
+            hasValue -> {
+                mockk {
+                    coEvery { this@mockk.get(any()) } returns Person.INSTANCE
                     coEvery { set(any(), any()) } just Runs
                     coEvery { unset(any()) } just Runs
                     coEvery { clear() } just Runs

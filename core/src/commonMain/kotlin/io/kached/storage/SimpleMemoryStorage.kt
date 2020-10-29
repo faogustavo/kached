@@ -1,16 +1,16 @@
 package io.kached.storage
 
-import io.kached.RawStorage
+import io.kached.Storage
 
-class SimpleMemoryStorage : RawStorage<String> {
+class SimpleMemoryStorage<V : Any> : Storage<V> {
 
-    private val store = LinkedHashMap<String, String>()
+    private val store = LinkedHashMap<String, V>()
 
-    override suspend fun set(key: String, data: String) {
+    override suspend fun set(key: String, data: V) {
         store[key] = data
     }
 
-    override suspend fun get(key: String): String? = store[key]
+    override suspend fun get(key: String): V? = store[key]
 
     override suspend fun unset(key: String) {
         store.remove(key)

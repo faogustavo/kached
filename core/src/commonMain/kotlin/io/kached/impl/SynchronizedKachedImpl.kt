@@ -5,6 +5,8 @@ import io.kached.LogLevel
 import io.kached.Logger
 import io.kached.Serializer
 import io.kached.Storage
+import io.kached.StorageBuilder
+import io.kached.StorageType
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
@@ -19,9 +21,20 @@ class SynchronizedKachedImpl<V : Any> @PublishedApi internal constructor(
     logger: Logger,
     dataClass: KClass<V>,
     dataType: KType,
+    storageType: StorageType,
+    memoryStorageBuilder: StorageBuilder<V>,
     private val readKey: Any = CachedLocker(),
     private val writeKey: Any = readKey,
-) : KachedImpl<V>(serializer, storage, encryptor, logger, dataClass, dataType) {
+) : KachedImpl<V>(
+    serializer = serializer,
+    storage = storage,
+    encryptor = encryptor,
+    logger = logger,
+    dataClass = dataClass,
+    dataType = dataType,
+    storageType = storageType,
+    memoryStorageBuilder = memoryStorageBuilder,
+) {
     private val mutex = Mutex()
 
     override suspend fun set(key: String, value: V) {

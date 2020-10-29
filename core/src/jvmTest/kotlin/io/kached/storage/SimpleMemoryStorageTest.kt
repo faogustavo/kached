@@ -10,7 +10,7 @@ private const val VALUE = "bar"
 
 class SimpleMemoryStorageTest {
 
-    private val subject = SimpleMemoryStorage()
+    private val subject = SimpleMemoryStorage<String>()
 
     @Test
     fun get_withoutItem_returnsNull() = runBlockingTest {
