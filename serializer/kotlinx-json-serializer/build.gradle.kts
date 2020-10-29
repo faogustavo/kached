@@ -16,7 +16,42 @@ tasks.withType<KotlinCompile> {
 }
 
 kotlin {
-    jvm()
+    targets {
+        jvm {
+            compilations.all {
+                kotlinOptions.jvmTarget = "1.8"
+            }
+        }
+        js {
+            browser {
+                testTask {
+                    useKarma {
+                        useChromeHeadless()
+                        webpackConfig.cssSupport.enabled = true
+                    }
+                }
+            }
+        }
+
+        ios()
+        tvos()
+        watchos()
+        macosX64()
+
+        linuxX64()
+        mingwX64()
+    }
+
+    targets.all {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + arrayOf(
+                    "-Xopt-in=kotlin.RequiresOptIn",
+                    "-Xopt-in=kotlin.ExperimentalStdlibApi"
+                )
+            }
+        }
+    }
 
     sourceSets {
         val commonMain by getting{
