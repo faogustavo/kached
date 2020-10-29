@@ -22,7 +22,7 @@ open class KachedImpl<V : Any> @PublishedApi internal constructor(
         log("Kached -> set($key)", LogLevel.Info)
 
         val serializedValue = try {
-            serializer.serialize(value)
+            serializer.serialize(value, dataClass, dataType)
         } catch (error: Throwable) {
             log("Failed to serialize value with key = $key", LogLevel.Warning)
             log(error, LogLevel.Error)

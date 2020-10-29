@@ -33,7 +33,7 @@ class GsonSerializerTest {
 
     @Test
     fun serialize_callsGsonToJson() = runBlockingTest {
-        subject.serialize(Person.INSTANCE)
+        subject.serialize(Person.INSTANCE, Person.KCLASS, Person.KTYPE)
 
         verify(exactly = 1) { gson.toJson(Person.INSTANCE) }
     }

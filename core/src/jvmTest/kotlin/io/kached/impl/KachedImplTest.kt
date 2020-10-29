@@ -56,7 +56,7 @@ class KachedImplTest {
 
         subject.set(Person.KEY, Person.INSTANCE)
 
-        coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
+        coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE, Person::class, typeOf<Person>()) }
         coVerify(exactly = 1) { encryptor.encrypt(Person.SERIAL_VALUE) }
         coVerify(exactly = 1) { storage.set(Person.KEY, Person.ENCRYPTED_VALUE) }
     }
@@ -171,7 +171,7 @@ class KachedImplTest {
 
         subject.set(Person.KEY, Person.INSTANCE)
 
-        coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE) }
+        coVerify(exactly = 1) { serializer.serialize(Person.INSTANCE, Person::class, typeOf<Person>()) }
         coVerify(exactly = 0) { storage.set(any(), any()) }
         coVerify(exactly = 0) { encryptor.encrypt(Person.SERIAL_VALUE) }
         coVerify(exactly = 1) { logger.log("Failed to serialize value with key = ${Person.KEY}", LogLevel.Warning) }
@@ -356,12 +356,12 @@ class KachedImplTest {
     ) {
         serializer = if (throwError) {
             mockk {
-                coEvery { serialize(any()) } throws SerializationError
+                coEvery { serialize(any(), any(), any()) } throws SerializationError
                 coEvery { deserialize<Person>(any(), any(), any()) } throws SerializationError
             }
         } else {
             mockk {
-                coEvery { serialize(any()) } returns Person.SERIAL_VALUE
+                coEvery { serialize(any(), any(), any()) } returns Person.SERIAL_VALUE
                 coEvery { deserialize<Person>(any(), any(), any()) } returns Person.INSTANCE
             }
         }
