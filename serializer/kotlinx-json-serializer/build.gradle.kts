@@ -57,7 +57,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(Kached.core))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+                implementation(Serializers.kotlinxJson)
             }
         }
         val jvmTest by getting {
