@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -14,6 +15,7 @@ import kotlin.test.assertNull
 private const val KEY = "foo"
 private const val VALUE = "bar"
 
+@ExperimentalCoroutinesApi
 class SharedPrefsStorageTest {
 
     private lateinit var sharedPrefsEditor: SharedPreferences.Editor

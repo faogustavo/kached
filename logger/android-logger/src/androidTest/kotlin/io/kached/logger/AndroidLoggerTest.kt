@@ -5,11 +5,13 @@ import io.kached.LogLevel
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
 private const val TEST_TAG = "TEST"
 
+@ExperimentalCoroutinesApi
 class AndroidLoggerTest {
 
     private val subject by lazy { AndroidLogger(TEST_TAG) }
