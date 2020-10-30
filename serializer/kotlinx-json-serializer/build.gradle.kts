@@ -22,16 +22,16 @@ kotlin {
                 kotlinOptions.jvmTarget = "1.8"
             }
         }
-        js {
-            browser {
-                testTask {
-                    useKarma {
-                        useChromeHeadless()
-                        webpackConfig.cssSupport.enabled = true
-                    }
-                }
-            }
-        }
+//        js {
+//            browser {
+//                testTask {
+//                    useKarma {
+//                        useChromeHeadless()
+//                        webpackConfig.cssSupport.enabled = true
+//                    }
+//                }
+//            }
+//        }
 
         ios()
         tvos()
