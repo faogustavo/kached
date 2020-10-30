@@ -8,7 +8,8 @@ interface Storage<T : Any> {
 }
 
 interface StringStorage : Storage<String>
-interface RawStorage<T : Any> : Storage<T>
+
+typealias StorageBuilder<V> = () -> Storage<V>
 
 internal object EmptyStorage : StringStorage {
     private const val ERROR_MESSAGE = "No storage was provided"
