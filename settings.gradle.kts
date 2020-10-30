@@ -21,6 +21,7 @@ include(":core")
 // Serializers
 include(":serializer")
 include(":serializer:gson-serializer")
+include(":serializer:kotlinx-json-serializer")
 
 // Storage
 include(":storage")

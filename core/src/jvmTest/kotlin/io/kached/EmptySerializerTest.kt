@@ -21,7 +21,7 @@ class EmptySerializerTest {
     @Test
     fun serialize_shouldThrown() = runBlockingTest {
         try {
-            EmptySerializer.serialize(Person("1", "Gustavo"))
+            EmptySerializer.serialize(Person("1", "Gustavo"), Person::class, typeOf<Person>())
             fail("Serialize must thrown an exception")
         } catch (e: Throwable) {
             assertTrue(e is RuntimeException)

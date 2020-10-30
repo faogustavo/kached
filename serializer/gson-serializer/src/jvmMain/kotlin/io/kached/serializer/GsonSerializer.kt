@@ -10,7 +10,9 @@ class GsonSerializer constructor(
 ) : Serializer {
 
     override suspend fun <T : Any> serialize(
-        data: T
+        data: T,
+        kclass: KClass<T>,
+        ktype: KType
     ): String = gson.toJson(data)
 
     override suspend fun <T : Any> deserialize(

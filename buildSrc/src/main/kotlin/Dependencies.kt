@@ -37,6 +37,7 @@ object Test {
 
 object Serializers {
     const val gson = "com.google.code.gson:gson:2.8.6"
+    const val kotlinxJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
 }
 
 object Android {
