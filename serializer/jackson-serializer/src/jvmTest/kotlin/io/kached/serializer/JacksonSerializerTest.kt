@@ -1,6 +1,7 @@
 package io.kached.serializer
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
@@ -10,7 +11,7 @@ import kotlin.reflect.typeOf
 @ExperimentalCoroutinesApi
 class JacksonSerializerTest {
 
-    private val serializer = JacksonSerializer(ObjectMapper())
+    private val serializer = JacksonSerializer(ObjectMapper().registerModule(KotlinModule()))
 
     class Person(val id: String, val name: String) {
         companion object {
