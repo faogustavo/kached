@@ -43,6 +43,10 @@ object Serializers {
     const val jacksonKotlinModule = "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 }
 
+object Loggers {
+    const val sl4j = "org.slf4j:slf4j-api:1.7.30"
+}
+
 object Android {
     const val coreKtx = "androidx.core:core-ktx:1.3.2"
 }
