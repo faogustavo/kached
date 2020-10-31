@@ -36,6 +36,7 @@ include(":encryptor")
 include(":logger")
 include(":logger:simple-logger")
 include(":logger:android-logger")
+include(":logger:sl4j-logger")
 
 // Demos
 include(":demo")

@@ -40,6 +40,10 @@ object Serializers {
     const val kotlinxJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
 }
 
+object Loggers {
+    const val sl4j = "org.slf4j:slf4j-api:1.7.30"
+}
+
 object Android {
     const val coreKtx = "androidx.core:core-ktx:1.3.2"
 }
