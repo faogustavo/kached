@@ -44,6 +44,11 @@ class S3Storage constructor(
      *  on the bucket, so we wont implement it to avoid accidental wipes
      */
     override suspend fun clear() {
-        throw NotImplementedError("This method was not implemented due to safety reasons, if you want to use it please extend this class and override it")
+        throw NotImplementedError(
+            """
+            This method was not implemented due to safety reasons, 
+            if you want to use it please extend this class and override it
+            """
+        )
     }
 }
