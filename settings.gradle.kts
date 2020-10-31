@@ -28,6 +28,7 @@ include(":storage")
 include(":storage:shared-prefs-storage")
 include(":storage:file-storage")
 include(":storage:user-defaults-storage")
+include(":storage:s3-storage")
 
 // Encryptors
 include(":encryptor")

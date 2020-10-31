@@ -1,4 +1,3 @@
-
 object Kached {
     val core = ":core"
 
@@ -42,4 +41,8 @@ object Serializers {
 
 object Android {
     const val coreKtx = "androidx.core:core-ktx:1.3.2"
+}
+
+object Storages {
+    const val awsS3 = "software.amazon.awssdk:s3:2.5.18"
 }
