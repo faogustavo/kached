@@ -38,6 +38,9 @@ object Test {
 object Serializers {
     const val gson = "com.google.code.gson:gson:2.8.6"
     const val kotlinxJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
+    private const val jacksonVersion = "2.11.3"
+    const val jackson = "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    const val jacksonKotlinModule = "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 }
 
 object Android {
